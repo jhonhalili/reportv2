@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./report.css" rel="stylesheet">
+  <link href="./reportv2.css" rel="stylesheet">
+  <script defer src="reportv2.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+  <div id="dashboard-grid" class="w-full h-screen max-w-screen-xl mx-auto px-4 py-4 grid grid-cols-3 grid-rows-[repeat(2,minmax(0,1fr))] gap-4">
+
+    <!-- Container 1 -->
+    <div onclick="openPanel('panel1')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
+      <h2 class="text-lg font-semibold mb-2 text-center">Program Enrollment Distribution</h2>
+      <div class="flex-1 flex items-center justify-center">
+        <div class="relative w-[120px] h-[120px]">
+          <canvas id="previewDonutChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Container 2 -->
+    <div onclick="openPanel('panel2')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
+      <h2 class="text-lg font-semibold mb-2 text-center">Yearly Enrollment Comparison</h2>
+      <div class="flex-1 flex items-center justify-center text-gray-400">[ Empty ]</div>
+    </div>
+
+    <!-- Container 3 -->
+    <div onclick="openPanel('panel3')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
+      <h2 class="text-lg font-semibold mb-2 text-center">Top 5 Programs with Highest Enrollees</h2>
+      <div class="flex-1 flex items-center justify-center text-gray-400">[ Empty ]</div>
+    </div>
+
+    <!-- Container 4 -->
+    <div onclick="openPanel('panel4')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
+      <h2 class="text-lg font-semibold mb-2 text-center">Inquiry to Enrollment Conversion Rate</h2>
+      <div class="flex-1 flex items-center justify-center text-gray-400">[ Empty ]</div>
+    </div>
+
+    <!-- Container 5 -->
+    <div onclick="openPanel('panel5')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
+      <h2 class="text-lg font-semibold mb-2 text-center">Enrollment by Campus</h2>
+      <div class="flex-1 flex items-center justify-center text-gray-400">[ Empty ]</div>
+    </div>
+
+    <!-- Container 6 -->
+    <div onclick="openPanel('panel6')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
+      <h2 class="text-lg font-semibold mb-2 text-center">Demographic Breakdown</h2>
+      <div class="flex-1 flex items-center justify-center text-gray-400">[ Empty ]</div>
+    </div>
+    
+  </div>
+
+  <!-- Fullscreen Panels (All inside this div now) -->
+  <div id="fullscreen-panels">
+
+    <!-- Panel 1 -->
+    <div id="panel1" class="hidden fixed inset-0 bg-white p-6 z-50 overflow-auto opacity-0 scale-95 transition-all duration-300">
+      
+      <!-- Header with Title and Year Selector -->
+      <div class="flex justify-between items-center mt-2">
+        <button onclick="closePanel()" class="text-sm px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Go Back</button>
+        <h2 class="text-2xl font-bold text-center mx-auto">Program Enrollment Distribution</h2>
+        <select id="yearSelector" class="border rounded px-4 py-2 text-sm mt-2">
+          <option value="2024">2024-2025</option>
+          <option value="2025">2025-2026</option>
+          <option value="2026">2026-2027</option>
+        </select>        
+      </div>
+    
+      <!-- Chart and Program List Side by Side -->
+      <div class="flex mt-8 gap-8">
+        <!-- Right Side: Program Names -->
+        <div id="programList" class="w-full md:w-1/2 flex flex-col ml-16 mt-8 justify-center p-4"></div>
+        <!-- Left Side: Donut Chart -->
+        <div class="w-full md:w-1/2 flex justify-center">
+          <canvas id="donutChart" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2 -->
+    <div id="panel2" class="hidden fixed inset-0 bg-white p-6 z-50 overflow-auto opacity-0 scale-95 transition-all duration-300">
+      <button onclick="closePanel()" class="text-sm px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Go Back</button>
+      <h2 class="text-2xl font-bold mt-4">Yearly Enrollment Comparison</h2>
+      <div class="mt-8 text-gray-400">[ Chart + Features Here ]</div>
+    </div>
+
+    <!-- Panel 3 -->
+    <div id="panel3" class="hidden fixed inset-0 bg-white p-6 z-50 overflow-auto opacity-0 scale-95 transition-all duration-300">
+      <button onclick="closePanel()" class="text-sm px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Go Back</button>
+      <h2 class="text-2xl font-bold mt-4">Top 5 Programs with Highest Enrollees</h2>
+      <div class="mt-8 text-gray-400">[ Chart + Features Here ]</div>
+    </div>
+
+    <!-- Panel 4 -->
+    <div id="panel4" class="hidden fixed inset-0 bg-white p-6 z-50 overflow-auto opacity-0 scale-95 transition-all duration-300">
+      <button onclick="closePanel()" class="text-sm px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Go Back</button>
+      <h2 class="text-2xl font-bold mt-4">Inquiry to Enrollment Conversion Rate</h2>
+      <div class="mt-8 text-gray-400">[ Chart + Features Here ]</div>
+    </div>
+
+    <!-- Panel 5 -->
+    <div id="panel5" class="hidden fixed inset-0 bg-white p-6 z-50 overflow-auto opacity-0 scale-95 transition-all duration-300">
+      <button onclick="closePanel()" class="text-sm px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Go Back</button>
+      <h2 class="text-2xl font-bold mt-4">Enrollment by Campus</h2>
+      <div class="mt-8 text-gray-400">[ Chart + Features Here ]</div>
+    </div>
+
+    <!-- Panel 6 -->
+    <div id="panel6" class="hidden fixed inset-0 bg-white p-6 z-50 overflow-auto opacity-0 scale-95 transition-all duration-300">
+      <button onclick="closePanel()" class="text-sm px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Go Back</button>
+      <h2 class="text-2xl font-bold mt-4">Demographic Breakdown</h2>
+      <div class="mt-8 text-gray-400">[ Chart + Features Here ]</div>
+    </div>
+
+  </div> <!-- End of fullscreen-panels -->
+
+</body>
+</html>

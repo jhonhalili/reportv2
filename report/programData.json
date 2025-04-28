@@ -1,0 +1,34 @@
+{
+  "2024-2025": [
+    { "program": "Associate in Computer Technology", "value": 100 },
+    { "program": "Associate in Retail Technology", "value": 90 },
+    { "program": "Bachelor of Science in Retail Technology and Consumer Science", "value": 80 },
+    { "program": "Bachelor of Arts in Communication", "value": 60 },
+    { "program": "Bachelor of Multimedia Arts", "value": 50 },
+    { "program": "Bachelor of Science in Accountancy", "value": 100 },
+    { "program": "Bachelor of Science in Accounting Information System", "value": 70 },
+    { "program": "Bachelor of Science in Computer Engineering", "value": 95 },
+    { "program": "Bachelor of Science in Computer Science", "value": 85 },
+    { "program": "Bachelor of Science in Hospitality Management", "value": 40 },
+    { "program": "Bachelor of Science in Information Systems", "value": 65 },
+    { "program": "Bachelor of Science in Information Technology", "value": 110 },
+    { "program": "Bachelor of Science in Management Accounting", "value": 55 },
+    { "program": "Bachelor of Science in Office Administration", "value": 75 }
+  ],
+  "2025-2026": [
+    { "program": "Associate in Computer Technology", "value": 130 },
+    { "program": "Associate in Retail Technology", "value": 95 },
+    { "program": "Bachelor of Science in Retail Technology and Consumer Science", "value": 85 },
+    { "program": "Bachelor of Arts in Communication", "value": 65 },
+    { "program": "Bachelor of Multimedia Arts", "value": 55 },
+    { "program": "Bachelor of Science in Accountancy", "value": 105 },
+    { "program": "Bachelor of Science in Accounting Information System", "value": 75 },
+    { "program": "Bachelor of Science in Computer Engineering", "value": 100 },
+    { "program": "Bachelor of Science in Computer Science", "value": 90 },
+    { "program": "Bachelor of Science in Hospitality Management", "value": 45 },
+    { "program": "Bachelor of Science in Information Systems", "value": 70 },
+    { "program": "Bachelor of Science in Information Technology", "value": 115 },
+    { "program": "Bachelor of Science in Management Accounting", "value": 60 },
+    { "program": "Bachelor of Science in Office Administration", "value": 80 }
+  ]
+}
