@@ -137,10 +137,13 @@ function createPreviewChart() {
   new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Sample A', 'Sample B', 'Sample C'],
+      labels: ['Sample A', 'Sample B', 'Sample C','Sample D', 'Sample E', 'Sample F',
+              'Sample G', 'Sample H', 'Sample I','Sample J', 'Sample K', 'Sample L'],
       datasets: [{
-        data: [30, 50, 20],
-        backgroundColor: ['#4F46E5', '#10B981', '#F59E0B'],
+        data: [25, 30, 20, 5, 15, 18, 21, 10, 13, 19, 10, 12, 17, 23],
+        backgroundColor: ["#4F46E5", "#EC4899", "#22D3EE", "#F59E0B", "#10B981",
+                          "#EF4444", "#6366F1", "#3B82F6", "#06B6D4", "#F43F5E",
+                          "#8B5CF6", "#14B8A6", "#F97316", "#0EA5E9"],
         borderWidth: 1
       }]
     },
