@@ -7,6 +7,7 @@
   <link href="./reportv2.css" rel="stylesheet">
   <script defer src="reportv2.js"></script>
   <script defer src="reportYEC.js"></script>
+  <script defer src="reportTHE.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
@@ -37,8 +38,11 @@
     <!-- Container 3 -->
     <div onclick="openPanel('panel3')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
       <h2 class="text-lg font-semibold mb-2 text-center">Top 5 Programs with Highest Enrollees</h2>
-      <div class="flex-1 flex items-center justify-center text-gray-400">[ Empty ]</div>
+      <div class="flex-1 flex items-center justify-center">
+        <canvas id="miniTop5Chart" class="w-full h-full"></canvas>
+      </div>
     </div>
+    
 
     <!-- Container 4 -->
     <div onclick="openPanel('panel4')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
@@ -107,11 +111,23 @@
     
 
     <!-- Panel 3 -->
+    <!-- Container 3 Panel -->
     <div id="panel3" class="hidden fixed inset-0 bg-white p-6 z-50 overflow-auto opacity-0 scale-95 transition-all duration-300">
-      <button onclick="closePanel()" class="text-sm px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Go Back</button>
-      <h2 class="text-2xl font-bold mt-4">Top 5 Programs with Highest Enrollees</h2>
-      <div class="mt-8 text-gray-400">[ Chart + Features Here ]</div>
+      <div class="flex justify-between items-center mb-4">
+        <button onclick="closePanel()" class="text-sm px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">← Go Back</button>
+        <select id="top5YearSelector" class="text-sm px-3 py-2 bg-gray-100 border rounded hover:bg-gray-200">
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+        
+      </div>
+      <h2 class="text-2xl font-bold text-center">Top 5 Programs with Highest Enrollees</h2>
+      <div class="relative w-full h-[500px]">
+        <canvas id="top5BarChart" class="w-full h-full mt-12"></canvas>
+      </div>
     </div>
+
 
     <!-- Panel 4 -->
     <div id="panel4" class="hidden fixed inset-0 bg-white p-6 z-50 overflow-auto opacity-0 scale-95 transition-all duration-300">
