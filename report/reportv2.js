@@ -6,7 +6,6 @@ function openPanel(id) {
     panel.classList.remove('hidden');
     panel.classList.add('fade-shadow-in');
   }
-  
 
 // Function to close the panel and apply the fade-out animation
 function closePanel() {
@@ -20,7 +19,7 @@ function closePanel() {
         visiblePanel.classList.add('hidden');
         visiblePanel.classList.remove('fade-shadow-out');
         document.getElementById('dashboard-grid').classList.remove('hidden');
-      }, 300); // Match the duration of the fade out animation (0.3s)
+      }, 300); 
     }
   }
 
