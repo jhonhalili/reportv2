@@ -24,7 +24,6 @@ const campusesByRegion = {
   "Region XIII": ["Surigao"]
 };
 
-// 🎨 Define a color for each campus
 const campusColors = {
   "Alabang": "#60A5FA", "Caloocan": "#A78BFA", "Cubao": "#F87171", "Fairview": "#34D399", "Global City": "#FBBF24",
   "Las Piñas": "#F472B6", "Marikina": "#38BDF8", "Munoz-EDSA": "#C084FC", "Novaliches": "#FACC15", "Pasay-EDSA": "#4ADE80",
