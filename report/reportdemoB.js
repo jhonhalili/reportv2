@@ -53,11 +53,11 @@ const demographicData = {
   }
 };
 
-const yearSelect = document.getElementById("filterYear");
-const campusSelect = document.getElementById("filterCampus");
-const programSelect = document.getElementById("filterProgram");
+const yearSelectus = document.getElementById("filterYearsss");
+const campusSelect = document.getElementById("filterCampusss");
+const programSelect = document.getElementById("filterProgramsss");
 
-[yearSelect, campusSelect, programSelect].forEach(select => {
+[yearSelectus, campusSelect, programSelect].forEach(select => {
   select.addEventListener("change", updateCharts);
 });
 
@@ -77,7 +77,7 @@ function updateChart(chart, data, label = "") {
 }
 
 function updateCharts() {
-  const year = yearSelect.value;
+  const year = yearSelectus.value;
   const campus = campusSelect.value;
   const program = programSelect.value;
 
