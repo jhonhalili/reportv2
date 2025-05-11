@@ -89,7 +89,13 @@
     <!-- Container 6 -->
     <div onclick="openPanel('panel6')" class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex flex-col aspect-[4/3] cursor-pointer transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
       <h2 class="text-lg font-semibold mb-2 text-center">Demographic Breakdown</h2>
-      <div class="flex-1 flex items-center justify-center text-gray-400">[ Empty ]</div>
+      <div class="flex-1 flex items-center justify-center">
+        <div class="relative w-[200px] h-[200px]">
+
+          <!-- the actual canvas where the donut chart will be rendered by Chart.js -->
+                <canvas id="panel6chart"></canvas>
+              </div>
+      </div>
     </div>
     
   </div>
