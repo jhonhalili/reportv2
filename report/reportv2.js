@@ -1,20 +1,28 @@
+
 // Function to open a panel and apply the fade-in animation
-function openPanel(id) {
-    document.getElementById('dashboard-grid').classList.add('hidden');
-  
-    const panel = document.getElementById(id);
+    function openPanel(id) {
+
+// hide dashboard grid  
+    document.getElementById('dashboard-grid').classList.add('hidden'); 
+
+// get the target panel
+    const panel = document.getElementById(id); 
+    
+// show panel
     panel.classList.remove('hidden');
-    panel.classList.add('fade-shadow-in');
+    
+// fade-in animation
+    panel.classList.add('fade-shadow-in'); 
   }
 
-// Function to close the panel and apply the fade-out animation
-function closePanel() {
-    const visiblePanel = document.querySelector('#fullscreen-panels > div:not(.hidden)');
-    if (visiblePanel) {
-      visiblePanel.classList.remove('fade-shadow-in');
-      visiblePanel.classList.add('fade-shadow-out');
+// function to close the panel and apply the fade-out animation
+    function closePanel() {
+      const visiblePanel = document.querySelector('#fullscreen-panels > div:not(.hidden)');
+        if (visiblePanel) {
+          visiblePanel.classList.remove('fade-shadow-in');
+          visiblePanel.classList.add('fade-shadow-out');
   
-      // Wait for the fade-out animation to finish before hiding it
+// wait for the fade-out animation to finish before hiding it
       setTimeout(() => {
         visiblePanel.classList.add('hidden');
         visiblePanel.classList.remove('fade-shadow-out');
@@ -23,12 +31,19 @@ function closePanel() {
     }
   }
 
+// donut chart (program chart distribution)
+// holds reference to the Chart.js donut chart
   let donutChart;
+
+// stores loaded data from JSON file
   let programData = {};
   
+// creates a new donut chart with given labels, data, and colors
   function createDonutChart(labels, data, backgroundColors) {
     const ctx = document.getElementById('donutChart').getContext('2d');
-    if (donutChart) donutChart.destroy(); // Destroy previous chart
+
+// destroy existing chart instance before creating new one
+    if (donutChart) donutChart.destroy(); 
   
     donutChart = new Chart(ctx, {
       type: 'doughnut',
@@ -41,10 +56,10 @@ function closePanel() {
         }]
       },
       options: {
-        maintainAspectRatio: false, // Important!
+        maintainAspectRatio: false, // important!
         responsive: true,
         plugins: {
-          legend: { display: false },
+          legend: { display: false }, // hide legend for cleaner UI
           datalabels: {
             formatter: (value, ctx) => {
               const dataArr = ctx.chart.data.datasets[0].data;
@@ -67,10 +82,11 @@ function closePanel() {
         },
         cutout: '65%'
       },
-      plugins: [ChartDataLabels]
+      plugins: [ChartDataLabels] // enables data labels plugin
     });
   }
   
+// generates HSL-based distinct colors for chart slices
   function generateColors(count) {
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -79,9 +95,10 @@ function closePanel() {
     return colors;
   }
   
+// populates the year selector dropdown with available years
   function populateYearSelector(years) {
     const selector = document.getElementById('yearSelector');
-    selector.innerHTML = ''; // Clear first
+    selector.innerHTML = ''; // clear existing options
     years.forEach(year => {
       const option = document.createElement('option');
       option.value = year;
@@ -90,6 +107,7 @@ function closePanel() {
     });
   }
   
+// updates the donut chart based on selected year
   function updateChart() {
     const selectedYear = document.getElementById('yearSelector').value;
     const programs = programData[selectedYear];
@@ -102,6 +120,7 @@ function closePanel() {
   
     createDonutChart(labels, values, colors);
   
+  // update legend list below the chart
     const programList = document.getElementById('programList');
     programList.innerHTML = '';
   
@@ -129,8 +148,7 @@ function closePanel() {
   
   document.getElementById('yearSelector').addEventListener('change', updateChart);
 
-// mini chart
-
+// mini donut chart
 function createPreviewChart() {
   const ctx = document.getElementById('previewDonutChart').getContext('2d');
   new Chart(ctx, {
@@ -158,5 +176,5 @@ function createPreviewChart() {
   });
 }
 
-// Run after page loads
+// initialize the preview chart when the page loads
 window.addEventListener('DOMContentLoaded', createPreviewChart);
