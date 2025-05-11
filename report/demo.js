@@ -176,3 +176,33 @@ document.addEventListener("DOMContentLoaded", function () {
   updateCharts();
 });
 
+// mini chart
+
+function panel6chartu() {
+  const ctx = document.getElementById('panel6chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'pie', 
+    data: {
+      labels: ['Sample A', 'Sample B', 'Sample C', 'Sample D', 'Sample E', 'Sample F'],
+      datasets: [{
+        data: [25, 30, 20, 5, 15, 18],
+        backgroundColor: [
+          "#4F46E5", "#EC4899", "#22D3EE",
+          "#F59E0B", "#10B981", "#EF4444"
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      responsive: true,
+      plugins: {
+        legend: { display: false }, // hide labels for cleaner preview
+        tooltip: { enabled: false } // optional: disables hover tooltips
+      }
+    }
+  });
+}
+
+// initialize the preview chart when the page loads
+window.addEventListener('DOMContentLoaded', panel6chartu);
