@@ -236,3 +236,46 @@ document.getElementById("campusYearFilter").addEventListener("change", () => {
 });
 
 renderRegionButtons("Luzon");
+
+// mini bar
+
+function panel5chartu() {
+  const ctx = document.getElementById('panel5chart').getContext('2d');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Campus A', 'Campus B', 'Campus C', 'Campus D'],
+      datasets: [{
+        label: 'Enrollees',
+        data: [120, 95, 140, 75],
+        backgroundColor: ['#4F46E5', '#EC4899', '#22D3EE', '#F59E0B'],
+        borderRadius: 5,
+        barThickness: 40
+      }]
+    },
+    options: {
+      indexAxis: 'y', // horizontal bar chart
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      scales: {
+        x: {
+          ticks: { display: false },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { display: false }, // to hide the names
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded', panel5chartu);
+
+
