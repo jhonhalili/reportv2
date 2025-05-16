@@ -1,208 +1,179 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-// dummy dataset for chart visualization - structured by year > campus > program
-  const dummyData = {
-    "2024": {
-      "Ortigas-Cainta": {
-        "BSIT": {
-          program: [120],                                   // total enrollees in the program
-          age: [30, 60, 20, 10],                      // age group distribution: 17–19, 20–22, 23–25, 26+
-          gender: [70, 45, 5],                      // gender distribution: Male, Female, Prefer not to say
-          yearLevel: [40, 30, 20, 10]                     // year level distribution: 1st–4th year
-        },
-        "BSCS": {
-          program: [90],
-          age: [10, 40, 30, 10],
-          gender: [30, 50, 10],
-          yearLevel: [25, 25, 25, 15]
-        },
-      },
-      "Cubao": {
-        "BSIT": {
-          program: [100],
-          age: [20, 50, 20, 10],
-          gender: [60, 35, 5],
-          yearLevel: [35, 25, 25, 15]
-        },
-        "BSCS": {
-          program: [80],
-          age: [15, 30, 25, 10],
-          gender: [30, 40, 10],
-          yearLevel: [25, 20, 20, 15]
-        },
-      },
-    },
-    "2025": {
-      "Ortigas-Cainta": {
-        "BSIT": {
-          program: [130],
-          age: [40, 70, 30, 10],
-          gender: [80, 60, 10],
-          yearLevel: [45, 35, 30, 20]
-        },
-        "BSCS": {
-          program: [100],
-          age: [20, 50, 20, 10],
-          gender: [40, 50, 10],
-          yearLevel: [35, 25, 25, 15]
-        },
-      },
-      "Cubao": {
-        "BSIT": {
-          program: [110],
-          age: [30, 60, 25, 10],
-          gender: [70, 50, 10],
-          yearLevel: [40, 30, 30, 20]
-        },
-        "BSCS": {
-          program: [90],
-          age: [25, 40, 15, 10],
-          gender: [35, 45, 10],
-          yearLevel: [30, 20, 20, 20]
-        },
-      },
-    }
-  };
+// 1. default fallback values - define default data structure in case no data is available
+// this ensures charts will always have something to display even if no real data is loaded  
+  const defaultData = {
+  age: [
+    { category: "17-19", value: 0 },
+    { category: "20-22", value: 0 },
+    { category: "23-25", value: 0 },
+    { category: "26+", value: 0 }
+  ],
+  gender: [
+    { category: "Male", value: 0 },
+    { category: "Female", value: 0 },
+    { category: "Other", value: 0 }
+  ],
+  yearLevel: [
+    { category: "1st Year", value: 0 },
+    { category: "2nd Year", value: 0 },
+    { category: "3rd Year", value: 0 },
+    { category: "4th Year", value: 0 }
+  ],
+  admissionType: [
+    { category: "New", value: 0 },
+    { category: "Transferee", value: 0 },
+    { category: "Returnee", value: 0 }
+  ]
+};
 
-// grab references to the filter dropdowns
+// try to get demographic data from global window object, fall back to empty object if not available
+  const demographicData = window.demographics || {};
+
+// 2. DOM elements - get references to all the HTML elements we need to work with
   const yearSelect = document.getElementById("filterYear");
   const campusSelect = document.getElementById("filterCampus");
   const programSelect = document.getElementById("filterProgram");
 
-// get chart canvas contexts
-  const ctxProgram = document.getElementById("programChart").getContext("2d");
-  const ctxAge = document.getElementById("ageChart").getContext("2d");
-  const ctxGender = document.getElementById("genderChart").getContext("2d");
-  const ctxYearLevel = document.getElementById("yearLevelChart").getContext("2d");
+ // get chart contexts (the canvases where charts will be drawn)
+  const ctxAdmissionType = document.getElementById("admissionChart")?.getContext("2d");
+  const ctxAge = document.getElementById("ageChart")?.getContext("2d");
+  const ctxGender = document.getElementById("genderChart")?.getContext("2d");
+  const ctxYearLevel = document.getElementById("yearLevelChart")?.getContext("2d");
 
-// initialize pie chart for year level (shown under 'Program' label)
-  let programChart = new Chart(ctxProgram, {
-    type: 'pie',
-    data: {
-      labels: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
-      datasets: [{
-        data: [0, 0, 0, 0],
-        backgroundColor: ['#4CAF50', '#2196F3', '#FFC107', '#9C27B0']
-      }]
-    },
-    options: { 
-      responsive: true
-        } 
-  });
+// error handling: check if all chart canvases were found
+  if (!ctxAge || !ctxGender || !ctxYearLevel || !ctxAdmissionType) {
+    console.error("One or more chart canvases not found. Check your HTML IDs.");
+    return;
+  }
 
+// 3. helper functions - utilities to extract data in the format needed by charts
+  function extractLabels(dataArray) {
+    // safely extract category labels from data objects
+    return Array.isArray(dataArray)
+      ? dataArray.map(obj => obj.category || "")
+      : [];
+  }
 
-// initialize line chart for age group distribution
-  let ageChart = new Chart(ctxAge, {
+  function extractValues(dataArray) {
+    // safely extract numerical values from data objects (default to 0 if missing)
+    return Array.isArray(dataArray)
+      ? dataArray.map(obj => obj.value ?? 0)
+      : [];
+  }
+
+// 4. chart instances - create all charts with initial dummy data
+// this ensures charts are rendered immediately, even before real data loads
+
+  // age chart (line chart)
+  const ageChart = new Chart(ctxAge, {
     type: 'line',
     data: {
-      labels: ['17-19', '20-22', '23-25', '26+'],
-      datasets: [{     
-        label: 'Age Group',   
-        data: [0, 0, 0, 0],
-        backgroundColor: ['#4CAF50', '#2196F3', '#FFC107', '#9C27B0'],
+      labels: extractLabels(defaultData.age),
+      datasets: [{
+        label: 'Age Group',
+        data: extractValues(defaultData.age),
+        fill: false,
         borderColor: '#4CAF50',
-        tension: 0.5 // smooth curve
+        backgroundColor: '#4CAF50',
+        tension: 0.4
       }]
     },
     options: {
-      responsive: true}
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
   });
-  
-// initialize doughnut chart for gender distribution
-  let genderChart = new Chart(ctxGender, {
+
+  // gender chart (doughnut chart)
+  const genderChart = new Chart(ctxGender, {
     type: 'doughnut',
     data: {
-      labels: ['Male', 'Female', 'Prefer Not to Say'],
+      labels: extractLabels(defaultData.gender),
       datasets: [{
-        data: [0, 0, 0],
-        backgroundColor: ['#36A2EB','#FF6384', '#FFCE56']
+        data: extractValues(defaultData.gender),
+        backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56']
       }]
     },
     options: { responsive: true }
   });
 
-// initialize horizontal bar chart for year level
-  let yearLevelChart = new Chart(ctxYearLevel, {
+  // year Level chart (horizontal bar chart)
+  const yearLevelChart = new Chart(ctxYearLevel, {
     type: 'bar',
     data: {
-      labels: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
+      labels: extractLabels(defaultData.yearLevel),
       datasets: [{
-        data: [0, 0, 0, 0],
+        label: 'Year Level',
+        data: extractValues(defaultData.yearLevel),
         backgroundColor: ['#4CAF50', '#2196F3', '#FFC107', '#9C27B0']
       }]
     },
     options: {
       responsive: true,
-      indexAxis: 'y'// horizontal bar direction
+      indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true }
+      }
     }
-  }, 
-);
+  });
 
-// function to update all charts based on selected filters
+  // admission Type chart (pie chart)
+  const admissionTypeChart = new Chart(ctxAdmissionType, {
+    type: 'pie',
+    data: {
+      labels: extractLabels(defaultData.admissionType),
+      datasets: [{
+        data: extractValues(defaultData.admissionType),
+        backgroundColor: ['#8BC34A', '#00BCD4', '#FF9800']
+      }]
+    },
+    options: { responsive: true }
+  });
+
+// 5. chart updater function - updates all charts with new data based on current filter selections
   function updateCharts() {
+
+// get current filter values
     const year = yearSelect.value;
     const campus = campusSelect.value;
     const program = programSelect.value;
-  
-// fallback to empty data if selection is invalid or not present
-    const data =
-      dummyData[year]?.[campus]?.[program] || 
-      { program: [], age: [], gender: [], yearLevel: [] };
-  
-// update data for each chart
-    programChart.data.datasets[0].data = data.yearLevel;
-    programChart.update();
-  
-// update Age Range Line
-    ageChart.data.datasets[0].data = data.age;
-    ageChart.update();
-  
-// update Gender Doughnut
-    genderChart.data.datasets[0].data = data.gender;
-    genderChart.update();
-  
-// update Year Level Horizontal Bar
-    yearLevelChart.data.datasets[0].data = data.yearLevel;
-    yearLevelChart.update();
-  }
-  
 
-// attach listeners to dropdown filters so that charts update on change
+// get data for current filters, falling back to default if no data exists
+// uses optional chaining to safely navigate nested data structure
+  
+    const data = demographicData?.[year]?.[campus]?.[program] || defaultData;
+
+// update each chart with new data:
+
+    // AGE
+    ageChart.data.labels = extractLabels(data.age);
+    ageChart.data.datasets[0].data = extractValues(data.age);
+    ageChart.update();
+
+    // GENDER
+    genderChart.data.labels = extractLabels(data.gender);
+    genderChart.data.datasets[0].data = extractValues(data.gender);
+    genderChart.update();
+
+    // YEAR LEVEL
+    yearLevelChart.data.labels = extractLabels(data.yearLevel);
+    yearLevelChart.data.datasets[0].data = extractValues(data.yearLevel);
+    yearLevelChart.update();
+
+    // ADMISSION TYPE
+    admissionTypeChart.data.labels = extractLabels(data.admissionType);
+    admissionTypeChart.data.datasets[0].data = extractValues(data.admissionType);
+    admissionTypeChart.update();
+  }
+
+// 6. event listeners - Set up filters to update charts when selection changes
   yearSelect.addEventListener("change", updateCharts);
   campusSelect.addEventListener("change", updateCharts);
   programSelect.addEventListener("change", updateCharts);
 
-// trigger initial rendering of charts on page load
+// 7. initial draw - Update charts with initial data when page loads
   updateCharts();
 });
-
-// mini chart
-
-function panel6chartu() {
-  const ctx = document.getElementById('panel6chart').getContext('2d');
-  new Chart(ctx, {
-    type: 'pie', 
-    data: {
-      labels: ['Sample A', 'Sample B', 'Sample C', 'Sample D', 'Sample E', 'Sample F'],
-      datasets: [{
-        data: [25, 30, 20, 5, 15, 18],
-        backgroundColor: [
-          "#4F46E5", "#EC4899", "#22D3EE",
-          "#F59E0B", "#10B981", "#EF4444"
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      responsive: true,
-      plugins: {
-        legend: { display: false }, // hide labels for cleaner preview
-        tooltip: { enabled: false } // optional: disables hover tooltips
-      }
-    }
-  });
-}
-
-// initialize the preview chart when the page loads
-window.addEventListener('DOMContentLoaded', panel6chartu);
