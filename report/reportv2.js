@@ -1,157 +1,168 @@
 
-// Function to open a panel and apply the fade-in animation
-    function openPanel(id) {
-
-// hide dashboard grid  
-    document.getElementById('dashboard-grid').classList.add('hidden'); 
-
-// get the target panel
-    const panel = document.getElementById(id); 
-    
-// show panel
-    panel.classList.remove('hidden');
-    
-// fade-in animation
-    panel.classList.add('fade-shadow-in'); 
+  function openPanel(id) { // function to open a panel and apply the fade-in animation
+    document.getElementById('dashboard-grid').classList.add('hidden'); // hide the main dashboard grid to focus on the panel
+    const panel = document.getElementById(id); // get reference to the panel element using the provided ID
+    panel.classList.remove('hidden'); // make the panel visible by removing hidden class
+    panel.classList.add('fade-shadow-in'); // apply fade-in animation by adding animation class
   }
 
 // function to close the panel and apply the fade-out animation
     function closePanel() {
+
+// find the currently visible panel (the one without 'hidden' class)
       const visiblePanel = document.querySelector('#fullscreen-panels > div:not(.hidden)');
         if (visiblePanel) {
+
+// remove fade-in animation and apply fade-out animation
           visiblePanel.classList.remove('fade-shadow-in');
           visiblePanel.classList.add('fade-shadow-out');
   
 // wait for the fade-out animation to finish before hiding it
       setTimeout(() => {
+// hide the panel and clean up animation classes
         visiblePanel.classList.add('hidden');
         visiblePanel.classList.remove('fade-shadow-out');
-        document.getElementById('dashboard-grid').classList.remove('hidden');
+        document.getElementById('dashboard-grid').classList.remove('hidden'); // show the main dashboard grid again
       }, 300); 
     }
   }
 
-// donut chart (program chart distribution)
-// holds reference to the Chart.js donut chart
-  let donutChart;
+// initialize the dashboard when DOM content is loaded
+  document.addEventListener("DOMContentLoaded", () => {
+// check if required enrollment data exists
+  if (!programData || !programData.enrollment) {
+    console.error("Enrollment data is missing");
+    return;
+  }
 
-// stores loaded data from JSON file
-  let programData = {};
-  
-// creates a new donut chart with given labels, data, and colors
-  function createDonutChart(labels, data, backgroundColors) {
-    const ctx = document.getElementById('donutChart').getContext('2d');
+// extract available academic years from the data
+  const years = Object.keys(programData.enrollment);
+  const yearSelector = document.getElementById("yearSelector");
 
-// destroy existing chart instance before creating new one
-    if (donutChart) donutChart.destroy(); 
-  
-    donutChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: data,
-          backgroundColor: backgroundColors,
-          borderWidth: 1
-        }]
-      },
-      options: {
-        maintainAspectRatio: false, // important!
-        responsive: true,
-        plugins: {
-          legend: { display: false }, // hide legend for cleaner UI
-          datalabels: {
-            formatter: (value, ctx) => {
-              const dataArr = ctx.chart.data.datasets[0].data;
-              const total = dataArr.reduce((acc, val) => acc + val, 0);
-              const percentage = (value / total * 100).toFixed(1);
-              return `${percentage}%`;
-            },
-            color: '#333',
-            font: {
-              weight: 'bold'
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: (context) => {
-                return `${context.label}: ${context.parsed} students`;
-              }
-            }
-          }
+  let mainChart; // variable to store the current chart instance
+
+  years.forEach((year) => { // populate the year dropdown selector with options
+    const option = document.createElement("option");
+    option.value = year;
+    option.textContent = `${year}-${parseInt(year) + 1}`;
+    yearSelector.appendChild(option);
+  });
+
+  const updateProgramList = (year) => { // function to update the program list display for a selected year
+    const programList = document.getElementById("programList");
+    programList.innerHTML = ""; // clear previous entries
+
+// create a list entry for each program in the selected year
+    programData.enrollment[year].forEach((item) => {
+      const color = colorMap[item.program] || "#999999"; // get the color for this program from the color map
+
+      const entry = document.createElement("div"); // create container for program entry
+      entry.className = "flex items-center gap-2 mb-3 text-base font-medium"; // <-- Larger font
+
+      const colorDot = document.createElement("span");  // create colored dot indicator
+      colorDot.className = "inline-block w-3 h-3 rounded-full";
+      colorDot.style.backgroundColor = color;
+
+      const label = document.createElement("span"); // create text label showing program name and enrollment count
+      label.textContent = `${item.name}: ${item.value}`;
+
+// assemble the entry
+      entry.appendChild(colorDot);
+      entry.appendChild(label);
+      programList.appendChild(entry);
+    });
+  };
+
+// function to update the donut chart for a selected year
+  const updateDonutChart = (year) => {
+    const ctx = document.getElementById("donutChart").getContext("2d");
+    const data = programData.enrollment[year];
+
+// prepare chart data
+    const labels = data.map((item) => item.program);
+    const values = data.map((item) => item.value);
+    const colors = data.map((item) => colorMap[item.program] || "#999999");
+
+// chart configuration options
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          data: values,
+          backgroundColor: colors,
         },
-        cutout: '65%'
-      },
-      plugins: [ChartDataLabels] // enables data labels plugin
-    });
-  }
-  
-// generates HSL-based distinct colors for chart slices
-  function generateColors(count) {
-    const colors = [];
-    for (let i = 0; i < count; i++) {
-      colors.push(`hsl(${(i * 360 / count)}, 70%, 60%)`);
-    }
-    return colors;
-  }
-  
-// populates the year selector dropdown with available years
-  function populateYearSelector(years) {
-    const selector = document.getElementById('yearSelector');
-    selector.innerHTML = ''; // clear existing options
-    years.forEach(year => {
-      const option = document.createElement('option');
-      option.value = year;
-      option.textContent = year;
-      selector.appendChild(option);
-    });
-  }
-  
-// updates the donut chart based on selected year
-  function updateChart() {
-    const selectedYear = document.getElementById('yearSelector').value;
-    const programs = programData[selectedYear];
-  
-    if (!programs) return;
-  
-    const labels = programs.map(p => p.program);
-    const values = programs.map(p => p.value);
-    const colors = generateColors(labels.length);
-  
-    createDonutChart(labels, values, colors);
-  
-  // update legend list below the chart
-    const programList = document.getElementById('programList');
-    programList.innerHTML = '';
-  
-    programs.forEach((program, index) => {
-      const item = document.createElement('div');
-      item.className = "flex items-center mb-2";
-      item.innerHTML = `
-        <div class="w-4 h-4 mr-2 rounded-full" style="background-color:${colors[index]}"></div>
-        <span>${program.program}</span>
-      `;
-      programList.appendChild(item);
-    });
-  }
-  
-  // Load JSON
-  fetch('programData.json')
-    .then(response => response.json())
-    .then(data => {
-      programData = data;
-      const availableYears = Object.keys(programData);
-      populateYearSelector(availableYears);
-      updateChart();
-    })
-    .catch(error => console.error('Error loading program data:', error));
-  
-  document.getElementById('yearSelector').addEventListener('change', updateChart);
+      ],
+    };
 
-// mini donut chart
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 800,
+        easing: "easeInOutCubic",
+      },
+      plugins: {
+        legend: { display: false }, // hide default legend
+        tooltip: {
+          callbacks: {
+            // custom tooltip format showing program and student count
+            label: (context) => {
+              const label = context.label || "";
+              const value = context.raw;
+              return `${label}: ${value} students`;
+            },
+          },
+        },
+        datalabels: {
+          color: "#fff",
+          font: {
+            weight: "bold",
+          },
+          // show percentage values in the chart segments
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${percentage}%`;
+          },
+        },
+      },
+    };
+
+// update existing chart if it exists, otherwise create new one
+    if (mainChart) {
+      mainChart.data = chartData;
+      mainChart.options = chartOptions;
+      mainChart.update(); // smooth transition
+    } else {
+      mainChart = new Chart(ctx, {
+        type: "doughnut",
+        data: chartData,
+        options: chartOptions,
+        plugins: [ChartDataLabels], // add datalabels plugin
+      });
+    }
+  };
+
+// add event listener for year selection changes
+  yearSelector.addEventListener("change", (e) => {
+    const selectedYear = e.target.value;
+    updateProgramList(selectedYear);
+    updateDonutChart(selectedYear);
+  });
+
+// initialize with the first available year
+  const defaultYear = years[0];
+  yearSelector.value = defaultYear;
+  updateProgramList(defaultYear);
+  updateDonutChart(defaultYear);
+});
+
+
+
+// creates a smaller preview donut chart 
 function createPreviewChart() {
   const ctx = document.getElementById('previewDonutChart').getContext('2d');
-  new Chart(ctx, {
+  new Chart(ctx, { // create new chart with sample data
     type: 'doughnut',
     data: {
       labels: ['Sample A', 'Sample B', 'Sample C','Sample D', 'Sample E', 'Sample F',
