@@ -1,175 +1,177 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
 
- // dummy data representing conversion funnel: [Online, Walk-in, Registrants, Enrollees]
-  const dummyConversionData = {
-    "2024": {
-      ASCT: [200, 180, 150, 130], BSCS: [180, 160, 140, 120], BSIT: [220, 200, 180, 160],
-      BAMM: [140, 120, 110, 100], BSAIS: [120, 100, 90, 80], BSA: [210, 190, 170, 150],
-      BSOA: [100, 90, 80, 70], BSIS: [170, 150, 130, 120], BSRTCS: [150, 130, 120, 110],
-      ART: [90, 80, 70, 60], BACOMM: [80, 70, 60, 50], BSHM: [160, 140, 120, 100],
-      BSMA: [140, 120, 110, 90], BSCE: [190, 170, 150, 130]
-    },
-    "2025": {
-      ASCT: [220, 200, 170, 150], BSCS: [200, 180, 160, 140], BSIT: [250, 230, 210, 190],
-      BAMM: [150, 130, 120, 110], BSAIS: [130, 110, 100, 90], BSA: [230, 210, 190, 170],
-      BSOA: [110, 100, 90, 80], BSIS: [180, 160, 140, 130], BSRTCS: [160, 140, 130, 120],
-      ART: [100, 90, 80, 70], BACOMM: [90, 80, 70, 60], BSHM: [170, 150, 130, 110],
-      BSMA: [150, 130, 120, 100], BSCE: [200, 180, 160, 140]
-    },
-    "2026": {
-      ASCT: [240, 220, 190, 170], BSCS: [220, 200, 180, 160], BSIT: [270, 250, 230, 210],
-      BAMM: [160, 140, 130, 120], BSAIS: [140, 120, 110, 100], BSA: [250, 230, 210, 190],
-      BSOA: [120, 110, 100, 90], BSIS: [190, 170, 150, 140], BSRTCS: [170, 150, 140, 130],
-      ART: [110, 100, 90, 80], BACOMM: [100, 90, 80, 70], BSHM: [180, 160, 140, 120],
-      BSMA: [160, 140, 130, 110], BSCE: [210, 190, 170, 150]
-    }
-  };
-
-  const categoryLabels = ["Online", "Walk-in", "Registrants", "Enrollees"];
-  const colorPalette = ["#36A2EB", "#FF6384", "#FFCE56", "#4BC0C0"];
-  let conversionChart;
+// get DOM elements for year selector, view selector, and chart canvas
+  const yearSelector = document.getElementById("conversionYearSelector");
+  const viewSelector = document.getElementById("conversionViewSelector");
   const ctx = document.getElementById("conversionChart").getContext("2d");
 
-// function to get the top 5 programs based on 'Enrollees' count (last index in array)
+  let conversionChart; // variable to hold the Chart instance
+
+// constants for conversion funnel stages and their corresponding colors
+  const STAGES = ["Online Inquirers", "Walk-in Inquirers", "Registrants", "Enrollees"];
+  const STAGE_COLORS = ["#D9E4F5", "#A9C1E8", "#6399D6", "#2B6CB0"];
+
+// function to get the top 5 programs based on enrollee count
   function getTop5Programs(data) {
     return Object.entries(data)
-      .map(([prog, vals]) => [prog, vals[3]]) // sort by enrollees (index 3)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(entry => entry[0]);
+      .sort(([, a], [, b]) => b[3] - a[3]) // sort by enrollees
+      .slice(0, 5) // take top 5
+      .map(([program]) => program); // extract just the program names
   }
 
-// updates the stacked bar chart based on year and view mode (all or top 5)
-  function updateConversionChart(year, mode) {
-    const yearData = dummyConversionData[year];
-    const labels = mode === 'top5' ? getTop5Programs(yearData) : Object.keys(yearData);
+// main function to build/update the chart
+  function buildChart(year, view) {
 
-// each dataset represents a stage in the funnel (online, walk-in, etc.)
-    const datasets = categoryLabels.map((label, i) => ({
-      label,
-      data: labels.map(prog => yearData[prog][i]),
-      backgroundColor: colorPalette[i],
-      stack: 'stack1',
-      borderRadius: 4
+// get raw data for the selected year
+    const rawData = programData.conversionData[year];
+    if (!rawData) return; // exit if no data for selected year
+
+// get all programs or just top 5 based on view selection
+    const programs = Object.keys(rawData);
+    const selectedPrograms = view === "top5" ? getTop5Programs(rawData) : programs;
+
+// prepare datasets for each stage of the conversion funnel
+    const datasets = STAGES.map((stageLabel, stageIdx) => ({
+      label: stageLabel,
+      data: selectedPrograms.map((p) => rawData[p]?.[stageIdx] || 0), // get data for each program at this stage
+      backgroundColor: STAGE_COLORS[stageIdx], // assign corresponding color
     }));
 
-    if (conversionChart) {
+    const labels = selectedPrograms; // acronyms only
 
-// if chart exists, update its data
-      conversionChart.data.labels = labels;
-      conversionChart.data.datasets = datasets;
-      conversionChart.update();
-    } else {
+// destroy previous chart instance if it exists
+    if (conversionChart) conversionChart.destroy();
 
-// create the chart for the first time
-      conversionChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: {
-            duration: 800,
-            easing: 'easeOutQuart'
+// create new chart instance
+    conversionChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: datasets,
+      },
+      options: {
+        indexAxis: "x", // vertical chart (column bars)
+        responsive: true,
+        plugins: {
+          tooltip: {
+            mode: "index", // show tooltips for all datasets at same index
+            intersect: false,
           },
-          plugins: {
+          legend: {
+            position: "top", // place legend at top of chart
+          },
+          datalabels: {
+            anchor: "end",
+            align: "top",
+            formatter: (value) => value, // display the raw value
+          },
+        },
+        scales: {
+          x: {
+            stacked: false, // bars not stacked
             title: {
               display: true,
             },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}`
-              }
-            }
           },
-          scales: {
-            x: { stacked: true },
-            y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
-          }
-        }
-      });
-    }
+          y: {
+            beginAtZero: true, // y-axis starts at 0
+            stacked: false,
+            title: {
+              display: true,
+            },
+          },
+        },
+      },
+    });
   }
 
-  // select elements for controlling year and view mode
-  const yearSelector = document.getElementById('conversionYearSelector');
-  const viewSelector = document.getElementById('conversionViewSelector');
+// optional mapping of program acronyms to full names (currently not used)
+  const programNameMap = {
+    ASCT: "Associate in Computer Technology",
+    ART: "Associate in Retail Technology",
+    BSRTCS: "BS Retail Technology & Consumer Science",
+    BACOMM: "BA Communication",
+    BAMMA: "Bachelor of Multimedia Arts",
+    BSA: "BS Accountancy",
+    BSAIS: "BS Accounting Information System",
+    BSCPE: "BS Computer Engineering",
+    BSCS: "BS Computer Science",
+    BSHM: "BS Hospitality Management",
+    BSIS: "BS Information Systems",
+    BSIT: "BS Information Technology",
+    BSMA: "BS Management Accounting",
+    BSOA: "BS Office Administration",
+  };
 
-// event listeners: Update chart when selectors change
-  [yearSelector, viewSelector].forEach(el => {
-    el.addEventListener('change', () => {
-      updateConversionChart(yearSelector.value, viewSelector.value);
-    });
+// event listeners for dropdown changes
+  yearSelector.addEventListener("change", () => {
+    buildChart(yearSelector.value, viewSelector.value);
   });
 
- // initial chart render using default values
-  updateConversionChart("2024", "all");
+  viewSelector.addEventListener("change", () => {
+    buildChart(yearSelector.value, viewSelector.value);
+  });
+
+// initialize chart with default values
+  buildChart(yearSelector.value || "2024", viewSelector.value || "all");
 });
 
-// mini bar
 
-// labels and colors used in mini conversion chart
-const categoryLabels = ['Online Inquirers', 'Walk-in Inquirers', 'Registrants', 'Enrollees'];
-const colorPalette = ['#60A5FA', '#34D399', '#FBBF24', '#F87171'];
+// mini chart
+document.addEventListener("DOMContentLoaded", () => {
 
-// small dataset for demo/testing purposes
-const dummyConversionData = {
-  "2024": {
-    "Program A": [1, 2, 1, 1],
-    "Program B": [1, 1, 3, 1],
-    "Program C": [5, 1, 1, 1],
-    "Program D": [1, 3, 1, 1]
-  }
-};
+// get canvas context for mini chart
+  const miniCtx = document.getElementById("miniConversionChart").getContext("2d");
+  let miniChart; // variable to hold mini chart instance
 
-window.addEventListener("DOMContentLoaded", () => {
-  const ctx = document.getElementById("miniConversionChart").getContext("2d");
+  function renderMiniChart() {
+    const year = "2024"; // Or dynamically fetch the latest
+    const rawData = programData.conversionData?.[year];
+    if (!rawData) return;
 
-  const aggregate = [0, 0, 0, 0];
-  Object.values(dummyConversionData["2024"]).forEach(arr => {
-    arr.forEach((num, i) => aggregate[i] += num);
-  });
+// get top 4 programs by registrants
+    const top5 = Object.entries(rawData)
+      .sort(([, a], [, b]) => b[2] - a[2]) // index 3 = Enrollees
+      .slice(0, 4);
 
- // create a minimalist bar chart to show total conversions across all programs 
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: categoryLabels,
-      datasets: [{
-        data: aggregate,
-        backgroundColor: colorPalette,
-        borderRadius: 10,
-        barPercentage: 0.6,
-        categoryPercentage: 1.0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => `${ctx.label}: ${ctx.parsed.y}`
-          }
-        }
+    const labels = top5.map(([prog]) => prog); // acronyms
+    const enrollees = top5.map(([, data]) => data[2]); // registrant counts
+
+// destroy previous mini chart if it exists
+    if (miniChart) miniChart.destroy();
+    miniChart = new Chart(miniCtx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Enrollees",
+          data: enrollees,
+          backgroundColor: ["#D9E4F5", "#A9C1E8", "#6399D6", "#2B6CB0"],
+        }]
       },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            display: false 
-          }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }, // hide legend
+          tooltip: { enabled: false }, // disable tooltips
         },
-        y: {
-          beginAtZero: true,
-          grid: { display: false },
-          ticks: { precision: 0 }
+        scales: {
+          x: {
+          ticks: { display: false }, // hide x-axis labels
+          grid: { display: true, drawTicks: false },
+          title: { display: false }
+        },
+          y: {
+          ticks: { display: false }, // hide y-axis labels
+          grid: { display: true, drawTicks: false },
+          title: { display: false },
+          beginAtZero: true
+        }
         }
       }
-    }
-  });
+    });
+  }
+
+  renderMiniChart(); // initialize mini chart on load
 });
